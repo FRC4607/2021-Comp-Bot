@@ -96,10 +96,10 @@ public final class Constants {
     * @see {@link frc.robot.subsystems.Drivetrain}
     */        
     public static final class DRIVETRAIN {
-        public static final int LEFT_MASTER_ID = 16;                       // CAN number is 16 but it is plugged into port 0 on the PDP
-        public static final int LEFT_FOLLOWER_ID = 1;                      // 40 amps for all drive motors
-        public static final int RIGHT_MASTER_ID = 2; 
-        public static final int RIGHT_FOLLOWER_ID = 3; 
+        public static final int LEFT_MASTER_ID = 16;  //bottom left CAN ID
+        public static final int LEFT_FOLLOWER_ID = 1;  //top left CAN ID
+        public static final int RIGHT_MASTER_ID = 2; //bottom right can ID
+        public static final int RIGHT_FOLLOWER_ID = 3;  //top right can ID
         public static final int SENSOR_COUNTS_PER_ROTATION = 8192;         // Using a REV Through Bore Encoder
         public static final int LOW_GEAR_SOLENOID_ID = 3;                  // should be 3 and 6
         public static final int HIGH_GEAR_SOLENOID_ID = 6;
