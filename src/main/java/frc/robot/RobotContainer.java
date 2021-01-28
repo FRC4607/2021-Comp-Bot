@@ -18,14 +18,13 @@ import edu.wpi.first.wpilibj2.command.Command;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
-
-  private final TeleOp teleOp = new TeleOp(drivetrainSubsystem);
+  public static DrivetrainSubsystem drivetrainSubsystem = DrivetrainSubsystem.create();
 
   // Joysticks
-  public static final XboxController driver = new XboxController(Constants.CONTROLLER.DRIVER_XBOX);
-  public static final XboxController operator = new XboxController(Constants.CONTROLLER.OPERATOR_XBOX);
+  public XboxController driver = new XboxController(Constants.CONTROLLER.DRIVER_XBOX);
+  public XboxController operator = new XboxController(Constants.CONTROLLER.OPERATOR_XBOX);
 
+  private final TeleOp teleOp = new TeleOp(drivetrainSubsystem, driver);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

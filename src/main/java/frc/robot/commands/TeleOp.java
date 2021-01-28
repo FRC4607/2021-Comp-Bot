@@ -4,8 +4,8 @@
 
 package frc.robot.commands;
 
-import frc.robot.RobotContainer;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
@@ -13,14 +13,15 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 public class TeleOp extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final DrivetrainSubsystem m_subsystem;
-
+  private final XboxController mDriver;
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public TeleOp(DrivetrainSubsystem subsystem) {
+  public TeleOp(DrivetrainSubsystem subsystem, XboxController driver) {
     m_subsystem = subsystem;
+    mDriver = driver;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(subsystem);
   }
@@ -33,7 +34,9 @@ public class TeleOp extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_subsystem.drive.arcadeDrive(RobotContainer.driver.getY(Hand.kLeft), RobotContainer.driver.getX(Hand.kLeft));
+    //System.out.println(RobotContainer.driver.getY(Hand.kLeft));
+    //System.out.println(RobotContainer.driver.getX(Hand.kLeft));
+    m_subsystem.mDrive.arcadeDrive(mDriver.getY(Hand.kLeft), mDriver.getX(Hand.kLeft));
   }
 
   // Called once the command ends or is interrupted.
