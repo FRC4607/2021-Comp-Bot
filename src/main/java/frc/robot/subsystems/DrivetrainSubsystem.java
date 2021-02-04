@@ -21,12 +21,16 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final CANSparkMax mRightFollower;
   public final DifferentialDrive mDrive;
 
+  private boolean mUseTank;
+
   public DrivetrainSubsystem(CANSparkMax leftMaster, CANSparkMax leftFollower, CANSparkMax rightMaster, CANSparkMax rightFollower, DifferentialDrive drive) {
     mLeftMaster = leftMaster;
     mLeftFollower = leftFollower;
     mRightMaster = rightMaster;
     mRightFollower= rightFollower;
     mDrive = drive;
+    
+    mUseTank = false;
 
     mDrive.setDeadband(Constants.DRIVETRAIN.DEADBAND);
     
@@ -44,6 +48,19 @@ public class DrivetrainSubsystem extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
+  }
+
+  public void switchMode() {
+    mUseTank = !mUseTank;
+  }
+
+  public void update(double stick1, double stick2, double stick3) {
+    if (!mUseTank) {
+      mDrive.arcadeDrive(stick1, stick2);
+    }
+    else {
+      mDrive.tankDrive(stick1, stick3);
+    }
   }
 
   public static DrivetrainSubsystem create() {

@@ -6,9 +6,12 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.commands.SwitchDriveMode;
 import frc.robot.commands.SwitchGears;
 import frc.robot.commands.TeleOp;
+import frc.robot.commands.ToggleIntakePneumatics;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.IntakePneumaticsSubsystem;
 import frc.robot.subsystems.ShifterSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -23,6 +26,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public static DrivetrainSubsystem drivetrainSubsystem = DrivetrainSubsystem.create();
   public static ShifterSubsystem shifterSubsystem = ShifterSubsystem.create();
+  public static IntakePneumaticsSubsystem intakePneumaticsSubsystem = IntakePneumaticsSubsystem.create();
 
   // Joysticks
   public XboxController driver = new XboxController(Constants.CONTROLLER.DRIVER_XBOX);
@@ -45,9 +49,13 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    JoystickButton aButton = new JoystickButton(driver, 1);
+    JoystickButton driver_aButton = new JoystickButton(driver, 1);
+    JoystickButton driver_bButton = new JoystickButton(driver, 2);
+    JoystickButton driver_yButton = new JoystickButton(driver, 4);
 
-    aButton.toggleWhenActive(new SwitchGears(shifterSubsystem));
+    driver_aButton.whenPressed(new SwitchGears(shifterSubsystem));
+    driver_bButton.whenPressed(new ToggleIntakePneumatics(intakePneumaticsSubsystem)).whenReleased(new ToggleIntakePneumatics(intakePneumaticsSubsystem));
+    driver_yButton.whenPressed(new SwitchDriveMode(drivetrainSubsystem));
   }
 
   /**
