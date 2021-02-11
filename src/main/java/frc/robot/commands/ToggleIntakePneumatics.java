@@ -1,12 +1,12 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.IntakePneumaticsSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 
 public class ToggleIntakePneumatics extends CommandBase {
-    private final IntakePneumaticsSubsystem mPneumaticsSubsystem;
+    private final IntakeSubsystem mPneumaticsSubsystem;
 
-    public ToggleIntakePneumatics(IntakePneumaticsSubsystem subsytem) {
+    public ToggleIntakePneumatics(IntakeSubsystem subsytem) {
         mPneumaticsSubsystem = subsytem;
         addRequirements(subsytem);
     }
