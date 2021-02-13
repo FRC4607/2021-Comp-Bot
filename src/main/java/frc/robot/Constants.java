@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.util.Units;
 
 public final class Constants {
@@ -104,14 +105,20 @@ public final class Constants {
         public static final int LOW_GEAR_SOLENOID_ID = 3;                  // should be 3 and 6
         public static final int HIGH_GEAR_SOLENOID_ID = 6;
         public static final double DEADBAND = 0.1; 
-        public static final double kP = 1.1;
-        public static final double kD = 0.3;
+        public static final double kP = 1.36;
+        public static final double kD = 0.0;
         /** Voltage needed to overcome the motor’s static friction. kS */
-        public static final double kS = 0.747;
+        public static final double kS = 0.146;
         /** Voltage needed to hold (or "cruise") at a given constant velocity. kV */
-        public static final double kV = 2.98;
+        public static final double kV = 6.06;
         /** Voltage needed to induce a given acceleration in the motor shaft. kA */
-        public static final double kA = 0.474;
+        public static final double kA = 0.527;
+        public static final double kTrackwidthMeters = 1.5476154141624932;
+        public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackwidthMeters);
+        public static final double kMaxSpeedMetersPerSecond = 2;
+        public static final double kMaxAccelerationMetersPerSecondSquared = 1.25;
+        public static final double kRamseteB = 2;
+        public static final double kRamseteZeta = 0.7;
         public static final double AIM_TOLERANCE = 0.1;
         public static final int CLOSED_LOOP_ERROR_RANGE = 15;
         public static final int DRIVETRAIN_PIGEON = 10;
