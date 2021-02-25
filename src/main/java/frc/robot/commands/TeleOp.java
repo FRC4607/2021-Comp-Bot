@@ -36,7 +36,9 @@ public class TeleOp extends CommandBase {
   public void execute() {
     //System.out.println(RobotContainer.driver.getY(Hand.kLeft));
     //System.out.println(RobotContainer.driver.getX(Hand.kLeft));
-    m_subsystem.update(-mDriver.getY(Hand.kLeft), mDriver.getX(Hand.kLeft), -mDriver.getY(Hand.kRight));
+    double fixedX = mDriver.getX(Hand.kLeft);
+    fixedX = mDriver.getY(Hand.kLeft) > 0 ? fixedX : -fixedX;
+    m_subsystem.update(mDriver.getY(Hand.kLeft), fixedX, mDriver.getY(Hand.kRight));
   }
 
   // Called once the command ends or is interrupted.

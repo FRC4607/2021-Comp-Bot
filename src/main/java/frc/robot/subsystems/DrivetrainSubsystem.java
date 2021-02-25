@@ -12,9 +12,10 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.lib.drivers.SparkMax;
@@ -30,7 +31,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final CANEncoder mLeftEncoder;
   private final CANEncoder mRightEncoder;
 
-  private final Gyro mGyro;
+  private final PigeonIMU mGyro;
 
   private final DifferentialDriveOdometry mOdometry;
 
@@ -42,12 +43,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
     mRightMaster = rightMaster;
     mRightFollower= rightFollower;
 
-    mDrive = new DifferentialDrive(leftMaster, rightMaster);
+    mLeftMaster.setInverted(true);
+    mRightMaster.setInverted(true);
+
+    mDrive = new DifferentialDrive(mLeftMaster, mRightMaster);
     
     mLeftEncoder = mLeftMaster.getEncoder();
     mRightEncoder = mRightMaster.getEncoder();
 
-    mGyro = (Gyro) new PigeonIMU(new WPI_TalonSRX(Constants.DRIVETRAIN.DRIVETRAIN_PIGEON));
+    mGyro = new PigeonIMU(new WPI_TalonSRX(Constants.DRIVETRAIN.DRIVETRAIN_PIGEON));
 
     // Step 1: Multiply by gear ratio of output to get true RPM
     // Step 2: Multiply by wheel circumfrence in meters to get meters per minute
@@ -60,7 +64,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     mLeftEncoder.setPositionConversionFactor(0.47877872);
     mRightEncoder.setPositionConversionFactor(0.47877872);
 
-    mOdometry = new DifferentialDriveOdometry(mGyro.getRotation2d());
+    mOdometry = new DifferentialDriveOdometry(pigeonGetRotation2d());
 
     mUseTank = false;
 
@@ -72,10 +76,14 @@ public class DrivetrainSubsystem extends SubsystemBase {
     mRightFollower.setSmartCurrentLimit( Constants.CURRENT_LIMIT.SPARK_ZERO_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_FREE_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_RPM_LIMIT );
   }
 
+  private Rotation2d pigeonGetRotation2d() {
+    return new Rotation2d(mGyro.getAbsoluteCompassHeading());
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    mOdometry.update(mGyro.getRotation2d(), mLeftEncoder.getPosition(), mRightEncoder.getPosition());
+    mOdometry.update(pigeonGetRotation2d(), mLeftEncoder.getPosition(), mRightEncoder.getPosition());
   }
 
   @Override
@@ -85,7 +93,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   public void resetOdometry(Pose2d pose) {
     resetEncoders();
-    mOdometry.resetPosition(pose, mGyro.getRotation2d());
+    mOdometry.resetPosition(pose, pigeonGetRotation2d());
   }
 
   public void resetEncoders() {
@@ -98,7 +106,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public double getHeading() {
-    return mGyro.getRotation2d().getDegrees();
+    return pigeonGetRotation2d().getDegrees();
   }
 
   public Pose2d getPose() {
@@ -111,12 +119,36 @@ public class DrivetrainSubsystem extends SubsystemBase {
     mDrive.feed();
   }
 
+  public double getAverageEncoderDistance() {
+    return (mLeftEncoder.getPosition() + mRightEncoder.getPosition()) / 2.0;
+  }
+
+  public CANEncoder getLeftEncoder() {
+    return mLeftEncoder;
+  }
+
+  public CANEncoder getRightEncoder() {
+    return mRightEncoder;
+  }
+
+  public void setMaxOutput(double maxOutput) {
+    mDrive.setMaxOutput(maxOutput);
+  }
+
+  public void zeroHeading() {
+    mGyro.setCompassAngle(0);
+    mGyro.setFusedHeadingToCompass();
+    mGyro.setYawToCompass();
+  }
+
   public void switchMode() {
     mUseTank = !mUseTank;
   }
 
   public void update(double stick1, double stick2, double stick3) {
     if (!mUseTank) {
+      SmartDashboard.putNumber("stick1", stick1);
+      SmartDashboard.putNumber("stick2", stick2);
       mDrive.arcadeDrive(stick1, stick2);
     }
     else {

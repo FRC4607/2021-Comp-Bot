@@ -120,6 +120,10 @@ public class Vision {
     setLimelightState( ledMode.kOn ) ;
   }
 
+  public void setDriverMode() {
+    mLimelight.setCamMode( camMode.kDriver);
+  }
+
   public void setVisionMode() {
     mLimelight.setCamMode( camMode.kVision);
   }

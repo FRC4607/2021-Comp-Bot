@@ -16,6 +16,8 @@ import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
+import frc.robot.commands.MoveTurretManual;
+import frc.robot.commands.RunFlywheel;
 import frc.robot.commands.RunHopperMotor;
 import frc.robot.commands.RunTransferWheel;
 import frc.robot.commands.SetIntakeMotor;
@@ -23,12 +25,15 @@ import frc.robot.commands.SwitchDriveMode;
 import frc.robot.commands.SwitchGears;
 import frc.robot.commands.TeleOp;
 import frc.robot.commands.ToggleIntakePneumatics;
+import frc.robot.commands.TurretAlignment;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.HopperSubsystem;
 import frc.robot.subsystems.IndexerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShifterSubsystem;
 import frc.robot.subsystems.TransferWheelSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
@@ -48,6 +53,8 @@ public class RobotContainer {
   public static HopperSubsystem hopperSubsystem = HopperSubsystem.create();
   public static IndexerSubsystem indexerSubsystem = IndexerSubsystem.create();
   public static TransferWheelSubsystem transferWheelSubsystem = TransferWheelSubsystem.create();
+  public static FlywheelSubsystem flywheelSubsystem = FlywheelSubsystem.create();
+  public static TurretSubsystem turretSubsystem = TurretSubsystem.create();
 
   // Joysticks
   public XboxController driver = new XboxController(Constants.CONTROLLER.DRIVER_XBOX);
@@ -55,6 +62,8 @@ public class RobotContainer {
 
   private final TeleOp teleOp = new TeleOp(drivetrainSubsystem, driver);
   private final SetIntakeMotor setIntakeMotor = new SetIntakeMotor(intakePneumaticsSubsystem, driver);
+  private final RunFlywheel runFlywheel = new RunFlywheel(flywheelSubsystem, operator);
+  private final MoveTurretManual moveTurretManual = new MoveTurretManual(turretSubsystem, operator);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -63,6 +72,8 @@ public class RobotContainer {
 
     drivetrainSubsystem.setDefaultCommand(teleOp);
     intakePneumaticsSubsystem.setDefaultCommand(setIntakeMotor);
+    flywheelSubsystem.setDefaultCommand(runFlywheel);
+    turretSubsystem.setDefaultCommand(moveTurretManual);
   }
 
   /**
@@ -79,6 +90,7 @@ public class RobotContainer {
     JoystickButton operator_aButton = new JoystickButton(operator, 1);
     JoystickButton operator_bButton = new JoystickButton(operator, 2);
     JoystickButton operator_xButton = new JoystickButton(operator, 3);
+    JoystickButton operator_leftBumper = new JoystickButton(operator, 5);
 
     driver_aButton.whenPressed(new SwitchGears(shifterSubsystem));
     driver_bButton.whenPressed(new ToggleIntakePneumatics(intakePneumaticsSubsystem));
@@ -89,6 +101,7 @@ public class RobotContainer {
     operator_xButton.whenPressed(new InstantCommand( () -> { hopperSubsystem.mBackwards = !hopperSubsystem.mBackwards;
       indexerSubsystem.mBackwards = !indexerSubsystem.mBackwards;
       transferWheelSubsystem.mBackwards = !transferWheelSubsystem.mBackwards; } ));
+    operator_leftBumper.whileHeld(new TurretAlignment(turretSubsystem));
   }
 
   /**
@@ -107,6 +120,7 @@ public class RobotContainer {
       DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
     }
 
+    drivetrainSubsystem.zeroHeading();
     drivetrainSubsystem.resetOdometry(trajectory.getInitialPose());
 
     RamseteCommand ramseteCommand = new RamseteCommand(
