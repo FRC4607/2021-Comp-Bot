@@ -36,9 +36,10 @@ public class TeleOp extends CommandBase {
   public void execute() {
     //System.out.println(RobotContainer.driver.getY(Hand.kLeft));
     //System.out.println(RobotContainer.driver.getX(Hand.kLeft));
-    double fixedX = mDriver.getX(Hand.kLeft);
-    fixedX = mDriver.getY(Hand.kLeft) > 0 ? fixedX : -fixedX;
-    m_subsystem.update(mDriver.getY(Hand.kLeft), fixedX, mDriver.getY(Hand.kRight));
+    double turn = mDriver.getX(Hand.kLeft);
+    turn = deadband(mDriver.getY(Hand.kLeft)) > 0 ? turn : -turn;
+    double speed = deadband(mDriver.getY(Hand.kLeft));
+    m_subsystem.update(-speed, -turn, mDriver.getY(Hand.kRight));
   }
 
   // Called once the command ends or is interrupted.
@@ -51,5 +52,13 @@ public class TeleOp extends CommandBase {
     return false;
 
 
+  }
+
+  private double deadband(double setpoint){
+    if(Math.abs(setpoint)>.1){
+      return setpoint;
+    }else{
+      return 0.0;
+    }
   }
 }

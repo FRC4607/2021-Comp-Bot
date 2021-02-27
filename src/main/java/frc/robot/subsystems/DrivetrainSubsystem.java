@@ -31,9 +31,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final CANEncoder mLeftEncoder;
   private final CANEncoder mRightEncoder;
 
-  private final PigeonIMU mGyro;
-
+  //private final PigeonIMU mGyro;
+  private final PigeonIMU _pidgey;      // Pigeon IMU used to enforce straight drive
   private final DifferentialDriveOdometry mOdometry;
+  private double currentAngle;
 
   private boolean mUseTank;
 
@@ -43,15 +44,24 @@ public class DrivetrainSubsystem extends SubsystemBase {
     mRightMaster = rightMaster;
     mRightFollower= rightFollower;
 
-    mLeftMaster.setInverted(true);
-    mRightMaster.setInverted(true);
+    //mLeftMaster.setInverted(true);
+    //mRightMaster.setInverted(true);
 
     mDrive = new DifferentialDrive(mLeftMaster, mRightMaster);
     
     mLeftEncoder = mLeftMaster.getEncoder();
     mRightEncoder = mRightMaster.getEncoder();
 
-    mGyro = new PigeonIMU(new WPI_TalonSRX(Constants.DRIVETRAIN.DRIVETRAIN_PIGEON));
+    boolean isPigeonOnCAN = false;
+        if(isPigeonOnCAN){
+            /* Pigeon is on CANBus (powered from ~12V, and has a device ID of zero) */
+            _pidgey = new PigeonIMU(3);             // Change ID accordingly 
+        }else{
+            /* Pigeon is ribbon cabled to the specified CANTalon. */
+            _pidgey = new PigeonIMU(new WPI_TalonSRX(Constants.DRIVETRAIN.DRIVETRAIN_PIGEON));   // Change Talon Accordingly
+        }
+        
+    //mGyro = new PigeonIMU(new WPI_TalonSRX(Constants.DRIVETRAIN.DRIVETRAIN_PIGEON));
 
     // Step 1: Multiply by gear ratio of output to get true RPM
     // Step 2: Multiply by wheel circumfrence in meters to get meters per minute
@@ -60,9 +70,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
     mLeftEncoder.setVelocityConversionFactor(velocityFactor);
     mRightEncoder.setVelocityConversionFactor(velocityFactor);
 
-    // Multiply by wheel circumfrence to get total meters traveled.
-    mLeftEncoder.setPositionConversionFactor(0.47877872);
-    mRightEncoder.setPositionConversionFactor(0.47877872);
+    // Multiply by gear ratio wheel circumfrence to get total meters traveled.
+    double positionFactor = 0.04291187739 * 0.47877872;
+    mLeftEncoder.setPositionConversionFactor(positionFactor);
+    mRightEncoder.setPositionConversionFactor(positionFactor);
 
     mOdometry = new DifferentialDriveOdometry(pigeonGetRotation2d());
 
@@ -77,13 +88,32 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   private Rotation2d pigeonGetRotation2d() {
-    return new Rotation2d(mGyro.getAbsoluteCompassHeading());
+    return new Rotation2d( currentAngle * Math.PI/180);
   }
 
   @Override
   public void periodic() {
+
+    /* get Pigeon status information from Pigeon API */
+		PigeonIMU.GeneralStatus genStatus = new PigeonIMU.GeneralStatus();
+		PigeonIMU.FusionStatus fusionStatus = new PigeonIMU.FusionStatus();
+		double [] xyz_dps = new double [3];
+		/* grab some input data from Pigeon and gamepad*/
+		_pidgey.getGeneralStatus(genStatus);
+		_pidgey.getRawGyro(xyz_dps);
+		_pidgey.getFusedHeading(fusionStatus);
+    currentAngle = fusionStatus.heading;
+		boolean angleIsGood = (_pidgey.getState() == PigeonIMU.PigeonState.Ready) ? true : false;
+    double currentAngularRate = xyz_dps[2];
+    
+    SmartDashboard.putNumber("Gyro", currentAngle);
+    SmartDashboard.putNumber("pigeonGetRotation2d", pigeonGetRotation2d().getRadians());
+    SmartDashboard.putNumber("Left Dist", getLeftEncoderPos());
+    SmartDashboard.putNumber("Right Dist", getRightEncoderPos());
+    SmartDashboard.putNumber("Left Vel", mLeftEncoder.getVelocity());
+    SmartDashboard.putNumber("Right Vel", -mRightEncoder.getVelocity());
     // This method will be called once per scheduler run
-    mOdometry.update(pigeonGetRotation2d(), mLeftEncoder.getPosition(), mRightEncoder.getPosition());
+    mOdometry.update(pigeonGetRotation2d(), getLeftEncoderPos(), getRightEncoderPos());
   }
 
   @Override
@@ -120,7 +150,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public double getAverageEncoderDistance() {
-    return (mLeftEncoder.getPosition() + mRightEncoder.getPosition()) / 2.0;
+    return (getLeftEncoderPos() + getRightEncoderPos()) / 2.0;
   }
 
   public CANEncoder getLeftEncoder() {
@@ -130,15 +160,20 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public CANEncoder getRightEncoder() {
     return mRightEncoder;
   }
+  public double getLeftEncoderPos() {
+    return mLeftEncoder.getPosition();
+  }
+
+  public double getRightEncoderPos() {
+    return mRightEncoder.getPosition();
+  }
 
   public void setMaxOutput(double maxOutput) {
     mDrive.setMaxOutput(maxOutput);
   }
 
   public void zeroHeading() {
-    mGyro.setCompassAngle(0);
-    mGyro.setFusedHeadingToCompass();
-    mGyro.setYawToCompass();
+    _pidgey.setFusedHeading(0);
   }
 
   public void switchMode() {

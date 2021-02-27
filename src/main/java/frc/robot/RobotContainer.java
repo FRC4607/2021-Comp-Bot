@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
 import frc.robot.commands.MoveTurretManual;
@@ -26,6 +27,8 @@ import frc.robot.commands.SwitchGears;
 import frc.robot.commands.TeleOp;
 import frc.robot.commands.ToggleIntakePneumatics;
 import frc.robot.commands.TurretAlignment;
+import frc.robot.commands.ZeroEncoders;
+import frc.robot.commands.ZeroHeading;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.HopperSubsystem;
@@ -95,6 +98,7 @@ public class RobotContainer {
     driver_aButton.whenPressed(new SwitchGears(shifterSubsystem));
     driver_bButton.whenPressed(new ToggleIntakePneumatics(intakePneumaticsSubsystem));
     driver_yButton.whenPressed(new SwitchDriveMode(drivetrainSubsystem));
+  
 
     operator_aButton.whileHeld(new RunHopperMotor(hopperSubsystem, indexerSubsystem));
     operator_bButton.whileHeld(new RunTransferWheel(transferWheelSubsystem));
@@ -102,6 +106,9 @@ public class RobotContainer {
       indexerSubsystem.mBackwards = !indexerSubsystem.mBackwards;
       transferWheelSubsystem.mBackwards = !transferWheelSubsystem.mBackwards; } ));
     operator_leftBumper.whileHeld(new TurretAlignment(turretSubsystem));
+
+    SmartDashboard.putData("Zero Heading", new ZeroHeading(drivetrainSubsystem));
+    SmartDashboard.putData("Zero Encoders", new ZeroEncoders(drivetrainSubsystem));
   }
 
   /**
@@ -120,6 +127,7 @@ public class RobotContainer {
       DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
     }
 
+    shifterSubsystem.lowGear();
     drivetrainSubsystem.zeroHeading();
     drivetrainSubsystem.resetOdometry(trajectory.getInitialPose());
 

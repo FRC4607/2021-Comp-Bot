@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static edu.wpi.first.wpilibj.DoubleSolenoid.Value.kForward;
 import static edu.wpi.first.wpilibj.DoubleSolenoid.Value.kReverse;
@@ -19,6 +20,8 @@ public class ShifterSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
+        SmartDashboard.putBoolean("low Gear", mHighGear);
+
     }
 
     @Override
@@ -26,12 +29,12 @@ public class ShifterSubsystem extends SubsystemBase {
         // This method will be called once per scheduler run during simulation
     }
 
-    private void lowGear() {
+    public void lowGear() {
         mShifter.set(kForward);
         mHighGear = false;
     }
 
-    private void highGear() {
+    public void highGear() {
         mShifter.set(kReverse);
         mHighGear = true;
     }

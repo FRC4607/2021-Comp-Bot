@@ -113,7 +113,7 @@ public final class Constants {
         public static final double kV = 6.06;
         /** Voltage needed to induce a given acceleration in the motor shaft. kA */
         public static final double kA = 0.527;
-        public static final double kTrackwidthMeters = 1.5476154141624932;
+        public static final double kTrackwidthMeters = 0.63;
         public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackwidthMeters);
         public static final double kMaxSpeedMetersPerSecond = 2;
         public static final double kMaxAccelerationMetersPerSecondSquared = 1.25;
