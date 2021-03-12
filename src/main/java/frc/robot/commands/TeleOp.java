@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import frc.robot.Constants;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
@@ -14,6 +15,8 @@ public class TeleOp extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final DrivetrainSubsystem m_subsystem;
   private final XboxController mDriver;
+
+  private double lastSpeed;
   /**
    * Creates a new ExampleCommand.
    *
@@ -22,6 +25,8 @@ public class TeleOp extends CommandBase {
   public TeleOp(DrivetrainSubsystem subsystem, XboxController driver) {
     m_subsystem = subsystem;
     mDriver = driver;
+
+    lastSpeed = 0;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(subsystem);
   }
@@ -31,15 +36,22 @@ public class TeleOp extends CommandBase {
   public void initialize() {
   }
 
+  //https://stackoverflow.com/a/16659144
+  private static double clamp(double val, double min, double max) {
+    return Math.max(min, Math.min(max, val));
+  }
+
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     //System.out.println(RobotContainer.driver.getY(Hand.kLeft));
     //System.out.println(RobotContainer.driver.getX(Hand.kLeft));
     double turn = mDriver.getX(Hand.kLeft);
-    turn = deadband(mDriver.getY(Hand.kLeft)) > 0 ? turn : -turn;
+    //turn = deadband(mDriver.getY(Hand.kLeft)) > 0 ? turn : -turn;
+    //turn = clamp(turn, lastSpeed - Constants.DRIVETRAIN.TURN_SMOOTH, lastSpeed + Constants.DRIVETRAIN.TURN_SMOOTH);
+    //lastSpeed = turn;
     double speed = deadband(mDriver.getY(Hand.kLeft));
-    m_subsystem.update(-speed, -turn, mDriver.getY(Hand.kRight));
+    m_subsystem.update(turn, -speed, mDriver.getY(Hand.kRight));
   }
 
   // Called once the command ends or is interrupted.

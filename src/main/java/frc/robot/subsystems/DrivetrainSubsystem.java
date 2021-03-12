@@ -6,13 +6,17 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.sensors.PigeonIMU;
+ import com.revrobotics.AlternateEncoderType;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -28,15 +32,20 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final CANSparkMax mRightFollower;
   public final DifferentialDrive mDrive;
 
+  /*private final SpeedControllerGroup mLeft;
+  private final SpeedControllerGroup mRight;*/
+
   private final CANEncoder mLeftEncoder;
   private final CANEncoder mRightEncoder;
 
   //private final PigeonIMU mGyro;
-  private final PigeonIMU _pidgey;      // Pigeon IMU used to enforce straight drive
+  private final Gyro mGyro;
   private final DifferentialDriveOdometry mOdometry;
-  private double currentAngle;
 
   private boolean mUseTank;
+  private static final AlternateEncoderType kAltEncType = AlternateEncoderType.kQuadrature;
+  private static final int kCPR = 8192;
+
 
   public DrivetrainSubsystem(CANSparkMax leftMaster, CANSparkMax leftFollower, CANSparkMax rightMaster, CANSparkMax rightFollower) {
     mLeftMaster = leftMaster;
@@ -44,38 +53,34 @@ public class DrivetrainSubsystem extends SubsystemBase {
     mRightMaster = rightMaster;
     mRightFollower= rightFollower;
 
-    //mLeftMaster.setInverted(true);
-    //mRightMaster.setInverted(true);
+    /*mLeft = new SpeedControllerGroup(leftMaster, leftFollower);
+    mRight = new SpeedControllerGroup(rightMaster, rightFollower);*/
 
     mDrive = new DifferentialDrive(mLeftMaster, mRightMaster);
     
-    mLeftEncoder = mLeftMaster.getEncoder();
-    mRightEncoder = mRightMaster.getEncoder();
+    mLeftEncoder = mLeftMaster.getAlternateEncoder(kAltEncType, kCPR);
+    mLeftEncoder.setInverted(true);
+    mRightEncoder = mRightMaster.getAlternateEncoder(kAltEncType, kCPR);
 
-    boolean isPigeonOnCAN = false;
-        if(isPigeonOnCAN){
-            /* Pigeon is on CANBus (powered from ~12V, and has a device ID of zero) */
-            _pidgey = new PigeonIMU(3);             // Change ID accordingly 
-        }else{
-            /* Pigeon is ribbon cabled to the specified CANTalon. */
-            _pidgey = new PigeonIMU(new WPI_TalonSRX(Constants.DRIVETRAIN.DRIVETRAIN_PIGEON));   // Change Talon Accordingly
-        }
-        
+    //mLeftEncoder = mLeftMaster.getEncoder();
+    //mRightEncoder = mRightMaster.getEncoder();
+
+    mGyro = new ADXRS450_Gyro();
     //mGyro = new PigeonIMU(new WPI_TalonSRX(Constants.DRIVETRAIN.DRIVETRAIN_PIGEON));
 
     // Step 1: Multiply by gear ratio of output to get true RPM
     // Step 2: Multiply by wheel circumfrence in meters to get meters per minute
     // Step 3: Divide by 60 to get meters per second
-    double velocityFactor = 0.04291187739 * 0.47877872 / 60;
+    double velocityFactor = 0.47877872 / 60;
     mLeftEncoder.setVelocityConversionFactor(velocityFactor);
     mRightEncoder.setVelocityConversionFactor(velocityFactor);
 
     // Multiply by gear ratio wheel circumfrence to get total meters traveled.
-    double positionFactor = 0.04291187739 * 0.47877872;
+    double positionFactor = 0.47877872;
     mLeftEncoder.setPositionConversionFactor(positionFactor);
     mRightEncoder.setPositionConversionFactor(positionFactor);
 
-    mOdometry = new DifferentialDriveOdometry(pigeonGetRotation2d());
+    mOdometry = new DifferentialDriveOdometry(mGyro.getRotation2d());
 
     mUseTank = false;
 
@@ -87,33 +92,29 @@ public class DrivetrainSubsystem extends SubsystemBase {
     mRightFollower.setSmartCurrentLimit( Constants.CURRENT_LIMIT.SPARK_ZERO_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_FREE_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_RPM_LIMIT );
   }
 
-  private Rotation2d pigeonGetRotation2d() {
-    return new Rotation2d( currentAngle * Math.PI/180);
-  }
-
   @Override
   public void periodic() {
-
-    /* get Pigeon status information from Pigeon API */
-		PigeonIMU.GeneralStatus genStatus = new PigeonIMU.GeneralStatus();
-		PigeonIMU.FusionStatus fusionStatus = new PigeonIMU.FusionStatus();
-		double [] xyz_dps = new double [3];
 		/* grab some input data from Pigeon and gamepad*/
-		_pidgey.getGeneralStatus(genStatus);
-		_pidgey.getRawGyro(xyz_dps);
-		_pidgey.getFusedHeading(fusionStatus);
-    currentAngle = fusionStatus.heading;
-		boolean angleIsGood = (_pidgey.getState() == PigeonIMU.PigeonState.Ready) ? true : false;
-    double currentAngularRate = xyz_dps[2];
-    
-    SmartDashboard.putNumber("Gyro", currentAngle);
-    SmartDashboard.putNumber("pigeonGetRotation2d", pigeonGetRotation2d().getRadians());
     SmartDashboard.putNumber("Left Dist", getLeftEncoderPos());
     SmartDashboard.putNumber("Right Dist", getRightEncoderPos());
     SmartDashboard.putNumber("Left Vel", mLeftEncoder.getVelocity());
-    SmartDashboard.putNumber("Right Vel", -mRightEncoder.getVelocity());
+    SmartDashboard.putNumber("Right Vel", mRightEncoder.getVelocity());
+
+    //SmartDashboard.putNumber("m_left_alternateEncoder", m_left_alternateEncoder.getPosition());
+    //SmartDashboard.putNumber("m_right_alternateEncoder", m_right_alternateEncoder.getPosition());
+
     // This method will be called once per scheduler run
-    mOdometry.update(pigeonGetRotation2d(), getLeftEncoderPos(), getRightEncoderPos());
+    mOdometry.update(mGyro.getRotation2d(), getLeftEncoderPos(), getRightEncoderPos());
+  }
+
+  public void setReverse() {
+    mLeftMaster.setInverted(true);
+    mRightMaster.setInverted(true);
+  }
+
+  public void setForward() {
+    mLeftMaster.setInverted(false);
+    mRightMaster.setInverted(false);
   }
 
   @Override
@@ -123,7 +124,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   public void resetOdometry(Pose2d pose) {
     resetEncoders();
-    mOdometry.resetPosition(pose, pigeonGetRotation2d());
+    mOdometry.resetPosition(pose, mGyro.getRotation2d());
   }
 
   public void resetEncoders() {
@@ -136,7 +137,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public double getHeading() {
-    return pigeonGetRotation2d().getDegrees();
+    return mGyro.getRotation2d().getDegrees();
   }
 
   public Pose2d getPose() {
@@ -173,7 +174,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public void zeroHeading() {
-    _pidgey.setFusedHeading(0);
+    mGyro.reset();
   }
 
   public void switchMode() {
@@ -184,10 +185,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
     if (!mUseTank) {
       SmartDashboard.putNumber("stick1", stick1);
       SmartDashboard.putNumber("stick2", stick2);
-      mDrive.arcadeDrive(stick1, stick2);
+      mDrive.arcadeDrive(stick2, stick1);
     }
     else {
-      mDrive.tankDrive(stick1, stick3);
+      mDrive.tankDrive(stick1, -stick3);
     }
   }
 

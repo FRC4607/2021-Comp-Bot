@@ -1,8 +1,14 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import com.ctre.phoenix.sensors.CANCoder;
+import com.revrobotics.AlternateEncoderType;
+import com.revrobotics.CANEncoder;
+import com.revrobotics.CANError;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import frc.robot.Constants;
@@ -15,10 +21,15 @@ public class TurretSubsystem extends SubsystemBase {
     public final Vision mLimelight;
     private final CANSparkMax mHood;
 
+    private final CANEncoder mEncoder;
+
     public TurretSubsystem(CANSparkMax turret, Vision limelight, CANSparkMax hood) {
         mTurret = turret;
         mLimelight = limelight;
         mHood = hood;
+        mEncoder = mHood.getAlternateEncoder(AlternateEncoderType.kQuadrature, 8192);
+        mEncoder.setInverted(true);
+        mEncoder.setPosition(0);
     }
 
     @Override
@@ -55,10 +66,12 @@ public class TurretSubsystem extends SubsystemBase {
 
     public void enableHood(double speed) {
         mHood.set(speed);
+        SmartDashboard.putNumber("Hood Encoder", mEncoder.getPosition());
     }
 
     public void disableHood() {
         mHood.set(0.0);
+        SmartDashboard.putNumber("Hood Encoder", mEncoder.getPosition());
     }
 
     public static TurretSubsystem create() {

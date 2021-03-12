@@ -6,7 +6,9 @@ package frc.robot;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -14,9 +16,17 @@ import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Transform2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
+import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
+import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import frc.robot.commands.MoveTurretManual;
 import frc.robot.commands.RunFlywheel;
 import frc.robot.commands.RunHopperMotor;
@@ -49,7 +59,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
+  // The robot's subsystems and commands are defined here..
   public static DrivetrainSubsystem drivetrainSubsystem = DrivetrainSubsystem.create();
   public static ShifterSubsystem shifterSubsystem = ShifterSubsystem.create();
   public static IntakeSubsystem intakePneumaticsSubsystem = IntakeSubsystem.create();
@@ -70,6 +80,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    //drivetrainSubsystem.setForward();
     // Configure the button bindings
     configureButtonBindings();
 
@@ -117,22 +128,53 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-
-    String trajectoryJSON = "paths/Test.wpilib.json";
+    //drivetrainSubsystem.setReverse();
+    /*String trajectoryJSON = "paths/Test.wpilib.json";
     Trajectory trajectory = new Trajectory();
     try {
       Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
       trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
     } catch (IOException ex) {
       DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
-    }
+    }*/
+
+    var autoVoltageConstraint =
+        new DifferentialDriveVoltageConstraint(
+            new SimpleMotorFeedforward(Constants.DRIVETRAIN.kS,
+                                       Constants.DRIVETRAIN.kV,
+                                       Constants.DRIVETRAIN.kA),
+            Constants.DRIVETRAIN.kDriveKinematics,
+            10);
+
+    // Create config for trajectory
+    TrajectoryConfig config =
+        new TrajectoryConfig(Constants.DRIVETRAIN.kMaxSpeedMetersPerSecond,
+        Constants.DRIVETRAIN.kMaxAccelerationMetersPerSecondSquared)
+            // Add kinematics to ensure max speed is actually obeyed
+            .setKinematics(Constants.DRIVETRAIN.kDriveKinematics)
+            // Apply the voltage constraint
+            .addConstraint(autoVoltageConstraint)
+            .setReversed(true); 
+
+    // An example trajectory to follow.  All units in meters.
+    Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
+        // Start at the origin facing the +X direction
+        new Pose2d(0.0, 0.0, new Rotation2d(0.0)),
+        // Pass through these two interior waypoints, making an 's' curve path
+        List.of(
+            new Translation2d(-5.0, 0.0)
+        ),
+        // End 3 meters straight ahead of where we started, facing forward
+        new Pose2d(-10.0, 0.0, new Rotation2d(0.0)),
+        // Pass config
+        config
+    );
 
     shifterSubsystem.lowGear();
-    drivetrainSubsystem.zeroHeading();
-    drivetrainSubsystem.resetOdometry(trajectory.getInitialPose());
+    drivetrainSubsystem.resetOdometry(exampleTrajectory.getInitialPose());
 
     RamseteCommand ramseteCommand = new RamseteCommand(
-        trajectory,
+      exampleTrajectory,
         drivetrainSubsystem::getPose,
         new RamseteController(Constants.DRIVETRAIN.kRamseteB, Constants.DRIVETRAIN.kRamseteZeta),
         new SimpleMotorFeedforward(Constants.DRIVETRAIN.kS,
@@ -148,5 +190,17 @@ public class RobotContainer {
     );
     
     return ramseteCommand.andThen(() -> drivetrainSubsystem.tankDriveVolts(0, 0));
+  }
+
+  public Command getTestCommand() {
+    return new InstantCommand(() -> { Gyro cali = new ADXRS450_Gyro();
+      cali.calibrate();
+      try {
+        cali.close();
+      }
+      catch (Exception e) {
+          int death = 1 / 0;
+      }
+    });
   }
 }

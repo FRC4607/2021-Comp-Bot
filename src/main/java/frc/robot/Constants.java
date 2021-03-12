@@ -63,6 +63,7 @@ public final class Constants {
         public static final double MAX_ACCELERATION = 500.0;               // Smart Motion max acceleration
         public static final double DEADBAND = 0.1; 
         public static final double SPEED = 0.5;
+        public static final float SOFT_LIMIT = 5;
     }
 
     /**
@@ -104,15 +105,16 @@ public final class Constants {
         public static final int SENSOR_COUNTS_PER_ROTATION = 8192;         // Using a REV Through Bore Encoder
         public static final int LOW_GEAR_SOLENOID_ID = 3;                  // should be 3 and 6
         public static final int HIGH_GEAR_SOLENOID_ID = 6;
+        public static final double TURN_SMOOTH = 0.05;
         public static final double DEADBAND = 0.1; 
-        public static final double kP = 1.36;
+        public static final double kP = 1.4;
         public static final double kD = 0.0;
         /** Voltage needed to overcome the motor’s static friction. kS */
-        public static final double kS = 0.146;
+        public static final double kS = 0.145;
         /** Voltage needed to hold (or "cruise") at a given constant velocity. kV */
-        public static final double kV = 6.06;
+        public static final double kV = 4.79;
         /** Voltage needed to induce a given acceleration in the motor shaft. kA */
-        public static final double kA = 0.527;
+        public static final double kA = 0.238;
         public static final double kTrackwidthMeters = 0.63;
         public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics(kTrackwidthMeters);
         public static final double kMaxSpeedMetersPerSecond = 2;

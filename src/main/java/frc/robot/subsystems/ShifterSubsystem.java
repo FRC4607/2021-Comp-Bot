@@ -14,7 +14,7 @@ public class ShifterSubsystem extends SubsystemBase {
     public ShifterSubsystem(DoubleSolenoid shifter) {
         mShifter = shifter;
         mHighGear = false;
-        mShifter.set(kForward);
+        mShifter.set(kReverse);
     }
 
     @Override
@@ -30,12 +30,12 @@ public class ShifterSubsystem extends SubsystemBase {
     }
 
     public void lowGear() {
-        mShifter.set(kForward);
+        mShifter.set(kReverse);
         mHighGear = false;
     }
 
     public void highGear() {
-        mShifter.set(kReverse);
+        mShifter.set(kForward);
         mHighGear = true;
     }
     

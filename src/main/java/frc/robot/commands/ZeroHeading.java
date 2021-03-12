@@ -20,6 +20,6 @@ public class ZeroHeading extends InstantCommand {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_subsystem.zeroHeading();
+    //m_subsystem.setHeading(0);
   }
 }
