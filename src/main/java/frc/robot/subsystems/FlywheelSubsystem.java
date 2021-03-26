@@ -38,6 +38,8 @@ public class FlywheelSubsystem extends SubsystemBase {
 		mMaster.config_kI( Constants.FLYWHEEL.PID_IDX, 0, Constants.GLOBAL.CAN_TIMEOUT_MS );
 		mMaster.config_kD( Constants.FLYWHEEL.PID_IDX, 0, Constants.GLOBAL.CAN_TIMEOUT_MS );
         mMaster.config_kF( Constants.FLYWHEEL.PID_IDX, 0.0198, Constants.GLOBAL.CAN_TIMEOUT_MS );
+
+        mMaster.getSelectedSensorVelocity();
         
         setOpenLoop();
     }
@@ -68,6 +70,10 @@ public class FlywheelSubsystem extends SubsystemBase {
         mFollower.configPeakCurrentDuration( Constants.GLOBAL.TALON_CURRENT_LIMIT_TIMEOUT_MS );
         mMaster.enableCurrentLimit( true );
         mFollower.enableCurrentLimit( true );
+    }
+
+    public double getEncoderVelocity() {
+        return mMaster.getSelectedSensorVelocity() * 10 / 4096;
     }
 
     public void setClosedLoop(double target) {

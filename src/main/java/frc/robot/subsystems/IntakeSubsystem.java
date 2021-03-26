@@ -62,7 +62,7 @@ public class IntakeSubsystem extends SubsystemBase {
             mRoller.set( 0.0 );
         }
         else {
-            mRoller.set(-speed * 0.5);
+            mRoller.set(-speed * 0.90);
         }
     }
 

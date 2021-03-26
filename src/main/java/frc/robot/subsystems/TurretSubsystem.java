@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix.sensors.CANCoder;
@@ -21,7 +22,7 @@ public class TurretSubsystem extends SubsystemBase {
     public final Vision mLimelight;
     private final CANSparkMax mHood;
 
-    private final CANEncoder mEncoder;
+    public final CANEncoder mEncoder;
 
     public TurretSubsystem(CANSparkMax turret, Vision limelight, CANSparkMax hood) {
         mTurret = turret;
@@ -29,12 +30,14 @@ public class TurretSubsystem extends SubsystemBase {
         mHood = hood;
         mEncoder = mHood.getAlternateEncoder(AlternateEncoderType.kQuadrature, 8192);
         mEncoder.setInverted(true);
+        mEncoder.setPositionConversionFactor(33.6688282);
         mEncoder.setPosition(0);
+        SmartDashboard.putNumber("Hood Target", mEncoder.getPosition());
+        SmartDashboard.putData("Zero Hood", new InstantCommand(() -> { mEncoder.setPosition(0); }));
     }
 
     @Override
     public void periodic() {
-        // This method will be called once per scheduler run
     }
 
     @Override

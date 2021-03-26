@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory;
 
 import org.slf4j.Logger;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.lib.controllers.Vision.State;
 import frc.robot.lib.controllers.Vision.Status;
@@ -15,7 +16,9 @@ public class TurretAlignment extends CommandBase {
     private final Logger mLogger = LoggerFactory.getLogger( TurretAlignment.class );
 
     private Status mStatus;
-    
+
+    private double mTarget;
+
     public TurretAlignment(TurretSubsystem turret) {
         mTurret = turret;
         addRequirements(turret);
@@ -28,7 +31,7 @@ public class TurretAlignment extends CommandBase {
             mStatus = mTurret.mLimelight.getStatus();
             // Check the status of the controller
             if ( mStatus == Status.kTargeting ) {
-                mTurret.enableTurret( mTurret.mLimelight.getOutput() );
+                mTurret.enableTurret( mTurret.mLimelight.getTurretOutput() );
                 // mLogger.info( "Target at: [{}]", mLimelight.horizontalToTargetDeg()); 
             } else if ( mStatus == Status.kLostTarget ) {
                 // mIsFinished = true;
@@ -40,6 +43,19 @@ public class TurretAlignment extends CommandBase {
                 mTurret.disableTurret();
                 mLogger.warn( "Unknown status: [{}]", mStatus );
             }
+            SmartDashboard.putNumber("Limelight Measurement", mTurret.mLimelight.getVerticalDegrees());
+            if (mTurret.mLimelight.getVerticalDegrees() != 0.0) {
+                mTarget = 90 - mTurret.mLimelight.getVerticalDegrees() - 19;
+            }
+            SmartDashboard.putNumber("Hood Target", mTarget);
+            double error = mTarget - mTurret.mEncoder.getPosition();
+            if (Math.abs(error) < 1) {
+                error = 0;
+            }
+            SmartDashboard.putNumber("Hood Error", error);
+            double speed = (Math.sqrt(Math.pow(error, 2)/8100) + 0.1) * Math.signum(error);
+            mTurret.enableHood(speed);
+            SmartDashboard.putNumber("Hood Speed", speed);
         }
     }
 

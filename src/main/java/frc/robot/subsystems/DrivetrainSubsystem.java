@@ -99,6 +99,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Right Dist", getRightEncoderPos());
     SmartDashboard.putNumber("Left Vel", mLeftEncoder.getVelocity());
     SmartDashboard.putNumber("Right Vel", mRightEncoder.getVelocity());
+    SmartDashboard.putNumber("Fake Gyro Value", mGyro.getRotation2d().getDegrees());
 
     //SmartDashboard.putNumber("m_left_alternateEncoder", m_left_alternateEncoder.getPosition());
     //SmartDashboard.putNumber("m_right_alternateEncoder", m_right_alternateEncoder.getPosition());
@@ -136,6 +137,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
     return new DifferentialDriveWheelSpeeds(mLeftEncoder.getVelocity(), mRightEncoder.getVelocity());
   }
 
+  public Rotation2d getFakeRotation2d() {
+    return mGyro.getRotation2d().plus(new Rotation2d(Math.PI / 2));
+  }
+
   public double getHeading() {
     return mGyro.getRotation2d().getDegrees();
   }
@@ -147,6 +152,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public void tankDriveVolts(double leftVolts, double rightVolts) {
     mLeftMaster.setVoltage(leftVolts);
     mRightMaster.setVoltage(rightVolts);
+    mDrive.feed();
+  }
+
+  public void feed() {
     mDrive.feed();
   }
 

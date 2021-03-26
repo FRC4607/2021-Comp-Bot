@@ -1,7 +1,7 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.TurretSubsystem;
@@ -9,6 +9,8 @@ import frc.robot.subsystems.TurretSubsystem;
 public class MoveTurretManual extends CommandBase {
     private final TurretSubsystem mTurret;
     private final XboxController mOperator;
+
+    private double mTarget;
 
     public MoveTurretManual(TurretSubsystem turret, XboxController operator) {
         mTurret = turret;

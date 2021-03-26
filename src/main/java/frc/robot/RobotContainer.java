@@ -8,17 +8,17 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.geometry.Transform2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -27,6 +27,11 @@ import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
 import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RamseteCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.Auton;
 import frc.robot.commands.MoveTurretManual;
 import frc.robot.commands.RunFlywheel;
 import frc.robot.commands.RunHopperMotor;
@@ -47,10 +52,6 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShifterSubsystem;
 import frc.robot.subsystems.TransferWheelSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RamseteCommand;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -84,6 +85,7 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
 
+    turretSubsystem.mEncoder.setPosition(0);
     drivetrainSubsystem.setDefaultCommand(teleOp);
     intakePneumaticsSubsystem.setDefaultCommand(setIntakeMotor);
     flywheelSubsystem.setDefaultCommand(runFlywheel);
@@ -134,6 +136,7 @@ public class RobotContainer {
     try {
       Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
       trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+
     } catch (IOException ex) {
       DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
     }*/
@@ -153,28 +156,32 @@ public class RobotContainer {
             // Add kinematics to ensure max speed is actually obeyed
             .setKinematics(Constants.DRIVETRAIN.kDriveKinematics)
             // Apply the voltage constraint
-            .addConstraint(autoVoltageConstraint)
-            .setReversed(true); 
+            .addConstraint(autoVoltageConstraint);
 
     // An example trajectory to follow.  All units in meters.
-    Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
+    Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
         // Start at the origin facing the +X direction
-        new Pose2d(0.0, 0.0, new Rotation2d(0.0)),
+        new Pose2d(0.0, 0.0, new Rotation2d(Math.toRadians(0))),
         // Pass through these two interior waypoints, making an 's' curve path
+
         List.of(
-            new Translation2d(-5.0, 0.0)
+            new Translation2d(1.0, 0.0),
+            new Translation2d(2.0, 0.0),
+            new Translation2d(3.0, 0.0),
+            new Translation2d(4.0, 0.0),
+            new Translation2d(5.0, 0.0)
         ),
         // End 3 meters straight ahead of where we started, facing forward
-        new Pose2d(-10.0, 0.0, new Rotation2d(0.0)),
+        new Pose2d(6.0, 0.0, new Rotation2d(Math.toRadians(0))),
         // Pass config
         config
     );
 
     shifterSubsystem.lowGear();
-    drivetrainSubsystem.resetOdometry(exampleTrajectory.getInitialPose());
+    drivetrainSubsystem.resetOdometry(trajectory.getInitialPose());
 
     RamseteCommand ramseteCommand = new RamseteCommand(
-      exampleTrajectory,
+      trajectory,
         drivetrainSubsystem::getPose,
         new RamseteController(Constants.DRIVETRAIN.kRamseteB, Constants.DRIVETRAIN.kRamseteZeta),
         new SimpleMotorFeedforward(Constants.DRIVETRAIN.kS,
@@ -188,8 +195,10 @@ public class RobotContainer {
         drivetrainSubsystem::tankDriveVolts,
         drivetrainSubsystem
     );
+
     
     return ramseteCommand.andThen(() -> drivetrainSubsystem.tankDriveVolts(0, 0));
+    //return new Auton(drivetrainSubsystem, turretSubsystem, flywheelSubsystem, transferWheelSubsystem, hopperSubsystem, indexerSubsystem, intakePneumaticsSubsystem);
   }
 
   public Command getTestCommand() {

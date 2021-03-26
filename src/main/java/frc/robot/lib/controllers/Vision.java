@@ -49,12 +49,12 @@ public class Vision {
         if ( mState == State.kTurn ) {
           // read out vision target data
           // mLogger.info( "Target at: [{}]", mLimelight.horizontalToTargetDeg()); 
-
-          mTurningErrorDeg = mLimelight.horizontalToTargetDeg();
-          mTurn = mTurningErrorDeg * LIMELIGHT.SCALE_HORIZONTAL_TO_TARGET * TURRET.TURNING_GAIN;
+          mVerticalDegrees = mLimelight.verticalToTargetDeg();
+          mTurretTurningErrorDeg = mLimelight.horizontalToTargetDeg();
+          mTurretTurn = mTurretTurningErrorDeg * LIMELIGHT.SCALE_HORIZONTAL_TO_TARGET * TURRET.TURNING_GAIN;
           if ( !mLimelight.foundTarget() ) {
             mStatus = Status.kLostTarget; 
-          } else if ( Math.abs( mTurningErrorDeg ) < TURRET.STOP_TURNING_DEG ) {
+          } else if ( Math.abs( mTurretTurningErrorDeg ) < TURRET.STOP_TURNING_DEG ) {
             mStatus = Status.kReachedTarget;
           } else {
             mStatus = Status.kTargeting;
@@ -64,8 +64,9 @@ public class Vision {
     }
   };
 
-  private double mTurningErrorDeg = 0.0;
-  private double mTurn = 0.0;
+  private double mTurretTurningErrorDeg = 0.0;
+  private double mTurretTurn = 0.0;
+  private double mVerticalDegrees = 0.0;
   private State mState = State.kTurn; 
   private ledMode mDesiredLimelightState = ledMode.kOn; 
   private State mDesiredState = State.kTurn;
@@ -84,12 +85,16 @@ public class Vision {
     return mStatus;
   }
 
-  public synchronized double getOutput() {
-    return mTurn;
+  public synchronized double getTurretOutput() {
+    return mTurretTurn;
+  }
+
+  public synchronized double getVerticalDegrees() {
+    return mVerticalDegrees;
   }
 
   public synchronized double getRawLimelightTX() {
-    return mTurningErrorDeg;
+    return mTurretTurningErrorDeg;
   }
 
   public synchronized State getState() {
