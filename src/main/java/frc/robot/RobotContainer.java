@@ -84,7 +84,7 @@ public class RobotContainer {
     //drivetrainSubsystem.setForward();
     // Configure the button bindings
     configureButtonBindings();
-
+    SmartDashboard.putNumber("Turret Trim", 0);
     turretSubsystem.mEncoder.setPosition(0);
     drivetrainSubsystem.setDefaultCommand(teleOp);
     intakePneumaticsSubsystem.setDefaultCommand(setIntakeMotor);
@@ -141,7 +141,7 @@ public class RobotContainer {
       DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
     }*/
 
-    var autoVoltageConstraint =
+    /*var autoVoltageConstraint =
         new DifferentialDriveVoltageConstraint(
             new SimpleMotorFeedforward(Constants.DRIVETRAIN.kS,
                                        Constants.DRIVETRAIN.kV,
@@ -165,14 +165,15 @@ public class RobotContainer {
         // Pass through these two interior waypoints, making an 's' curve path
 
         List.of(
-            new Translation2d(1.0, 0.0),
-            new Translation2d(2.0, 0.0),
-            new Translation2d(3.0, 0.0),
-            new Translation2d(4.0, 0.0),
-            new Translation2d(5.0, 0.0)
+            new Translation2d(1.0, 1.0),
+            new Translation2d(2.0, -1.0),
+            new Translation2d(3.0, 1.0),
+            new Translation2d(4.0, -1.0),
+            new Translation2d(5.0, 1.0),
+            new Translation2d(6.0, -1.0)
         ),
         // End 3 meters straight ahead of where we started, facing forward
-        new Pose2d(6.0, 0.0, new Rotation2d(Math.toRadians(0))),
+        new Pose2d(7.0, 0.0, new Rotation2d(Math.toRadians(0))),
         // Pass config
         config
     );
@@ -197,8 +198,11 @@ public class RobotContainer {
     );
 
     
-    return ramseteCommand.andThen(() -> drivetrainSubsystem.tankDriveVolts(0, 0));
-    //return new Auton(drivetrainSubsystem, turretSubsystem, flywheelSubsystem, transferWheelSubsystem, hopperSubsystem, indexerSubsystem, intakePneumaticsSubsystem);
+    return ramseteCommand.andThen(() -> drivetrainSubsystem.tankDriveVolts(0, 0));*/
+    
+    drivetrainSubsystem.zeroHeading();
+    turretSubsystem.mEncoder.setPosition(0);
+    return new Auton(drivetrainSubsystem, shifterSubsystem, turretSubsystem, flywheelSubsystem, transferWheelSubsystem, hopperSubsystem, indexerSubsystem, intakePneumaticsSubsystem);
   }
 
   public Command getTestCommand() {

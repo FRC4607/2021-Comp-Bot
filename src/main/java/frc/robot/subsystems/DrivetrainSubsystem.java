@@ -12,6 +12,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
@@ -32,13 +33,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final CANSparkMax mRightFollower;
   public final DifferentialDrive mDrive;
 
-  /*private final SpeedControllerGroup mLeft;
-  private final SpeedControllerGroup mRight;*/
+  /*
+   * private final SpeedControllerGroup mLeft; private final SpeedControllerGroup
+   * mRight;
+   */
 
   private final CANEncoder mLeftEncoder;
   private final CANEncoder mRightEncoder;
 
-  //private final PigeonIMU mGyro;
+  // private final PigeonIMU mGyro;
   private final Gyro mGyro;
   private final DifferentialDriveOdometry mOdometry;
 
@@ -46,27 +49,30 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private static final AlternateEncoderType kAltEncType = AlternateEncoderType.kQuadrature;
   private static final int kCPR = 8192;
 
-
-  public DrivetrainSubsystem(CANSparkMax leftMaster, CANSparkMax leftFollower, CANSparkMax rightMaster, CANSparkMax rightFollower) {
+  public DrivetrainSubsystem(CANSparkMax leftMaster, CANSparkMax leftFollower, CANSparkMax rightMaster,
+      CANSparkMax rightFollower) {
     mLeftMaster = leftMaster;
     mLeftFollower = leftFollower;
     mRightMaster = rightMaster;
-    mRightFollower= rightFollower;
+    mRightFollower = rightFollower;
 
-    /*mLeft = new SpeedControllerGroup(leftMaster, leftFollower);
-    mRight = new SpeedControllerGroup(rightMaster, rightFollower);*/
+    /*
+     * mLeft = new SpeedControllerGroup(leftMaster, leftFollower); mRight = new
+     * SpeedControllerGroup(rightMaster, rightFollower);
+     */
 
     mDrive = new DifferentialDrive(mLeftMaster, mRightMaster);
-    
+
     mLeftEncoder = mLeftMaster.getAlternateEncoder(kAltEncType, kCPR);
     mLeftEncoder.setInverted(true);
     mRightEncoder = mRightMaster.getAlternateEncoder(kAltEncType, kCPR);
 
-    //mLeftEncoder = mLeftMaster.getEncoder();
-    //mRightEncoder = mRightMaster.getEncoder();
+    // mLeftEncoder = mLeftMaster.getEncoder();
+    // mRightEncoder = mRightMaster.getEncoder();
 
     mGyro = new ADXRS450_Gyro();
-    //mGyro = new PigeonIMU(new WPI_TalonSRX(Constants.DRIVETRAIN.DRIVETRAIN_PIGEON));
+    // mGyro = new PigeonIMU(new
+    // WPI_TalonSRX(Constants.DRIVETRAIN.DRIVETRAIN_PIGEON));
 
     // Step 1: Multiply by gear ratio of output to get true RPM
     // Step 2: Multiply by wheel circumfrence in meters to get meters per minute
@@ -85,21 +91,26 @@ public class DrivetrainSubsystem extends SubsystemBase {
     mUseTank = false;
 
     mDrive.setDeadband(Constants.DRIVETRAIN.DEADBAND);
-    
-    mLeftMaster.setSmartCurrentLimit( Constants.CURRENT_LIMIT.SPARK_ZERO_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_FREE_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_RPM_LIMIT );
-    mRightMaster.setSmartCurrentLimit( Constants.CURRENT_LIMIT.SPARK_ZERO_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_FREE_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_RPM_LIMIT );
-    mLeftFollower.setSmartCurrentLimit( Constants.CURRENT_LIMIT.SPARK_ZERO_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_FREE_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_RPM_LIMIT );
-    mRightFollower.setSmartCurrentLimit( Constants.CURRENT_LIMIT.SPARK_ZERO_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_FREE_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_RPM_LIMIT );
+
+    mLeftMaster.setSmartCurrentLimit(Constants.CURRENT_LIMIT.SPARK_ZERO_RPM_LIMIT,
+        Constants.CURRENT_LIMIT.SPARK_FREE_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_RPM_LIMIT);
+    mRightMaster.setSmartCurrentLimit(Constants.CURRENT_LIMIT.SPARK_ZERO_RPM_LIMIT,
+        Constants.CURRENT_LIMIT.SPARK_FREE_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_RPM_LIMIT);
+    mLeftFollower.setSmartCurrentLimit(Constants.CURRENT_LIMIT.SPARK_ZERO_RPM_LIMIT,
+        Constants.CURRENT_LIMIT.SPARK_FREE_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_RPM_LIMIT);
+    mRightFollower.setSmartCurrentLimit(Constants.CURRENT_LIMIT.SPARK_ZERO_RPM_LIMIT,
+        Constants.CURRENT_LIMIT.SPARK_FREE_RPM_LIMIT, Constants.CURRENT_LIMIT.SPARK_RPM_LIMIT);
   }
 
   @Override
   public void periodic() {
-		/* grab some input data from Pigeon and gamepad*/
+    /* grab some input data from Pigeon and gamepad */
     SmartDashboard.putNumber("Left Dist", getLeftEncoderPos());
     SmartDashboard.putNumber("Right Dist", getRightEncoderPos());
     SmartDashboard.putNumber("Left Vel", mLeftEncoder.getVelocity());
     SmartDashboard.putNumber("Right Vel", mRightEncoder.getVelocity());
     SmartDashboard.putNumber("Fake Gyro Value", mGyro.getRotation2d().getDegrees());
+    SmartDashboard.putData("Pose", (Sendable) getPose());
 
     //SmartDashboard.putNumber("m_left_alternateEncoder", m_left_alternateEncoder.getPosition());
     //SmartDashboard.putNumber("m_right_alternateEncoder", m_right_alternateEncoder.getPosition());

@@ -10,20 +10,20 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
-public class DriveForDistance extends CommandBase {
+public class DriveWithGyro extends CommandBase {
 
   private DrivetrainSubsystem mDrivetrain;
   private double mSetpoint;
   private double mSpeed;
-  private double mTurn;
+  private double mHeading;
 
   /**
    * Creates a new DriveForDistance.
    */
-  public DriveForDistance(DrivetrainSubsystem drivetrain, double setpoint, double turn, double speed) {
+  public DriveWithGyro(DrivetrainSubsystem drivetrain, double setpoint, double heading, double speed) {
     mDrivetrain = drivetrain;
     mSetpoint = setpoint;
-    mTurn = turn;
+    mHeading = heading;
     mSpeed = speed;
     addRequirements(mDrivetrain);
 
@@ -44,7 +44,9 @@ public class DriveForDistance extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute () {
-    mDrivetrain.update( mTurn, mSpeed, 0);
+    double kP = -0.1;
+    double turn = (mHeading - mDrivetrain.getHeading()) * kP;
+    mDrivetrain.update( turn, mSpeed, 0);
   }
 
   // Called once the command ends or is interrupted.

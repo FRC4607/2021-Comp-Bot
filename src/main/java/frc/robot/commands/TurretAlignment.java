@@ -46,6 +46,7 @@ public class TurretAlignment extends CommandBase {
             SmartDashboard.putNumber("Limelight Measurement", mTurret.mLimelight.getVerticalDegrees());
             if (mTurret.mLimelight.getVerticalDegrees() != 0.0) {
                 mTarget = 90 - mTurret.mLimelight.getVerticalDegrees() - 19;
+                mTarget -= SmartDashboard.getNumber("Turret Trim", 0);
             }
             SmartDashboard.putNumber("Hood Target", mTarget);
             double error = mTarget - mTurret.mEncoder.getPosition();

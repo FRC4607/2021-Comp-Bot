@@ -9,21 +9,26 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.ShifterSubsystem;
 
-public class DriveForDistance extends CommandBase {
+public class DriveWithGyroGears extends CommandBase {
 
   private DrivetrainSubsystem mDrivetrain;
+  private ShifterSubsystem mShifter;
+  private boolean mIsHighGear;
   private double mSetpoint;
   private double mSpeed;
-  private double mTurn;
+  private double mHeading;
 
   /**
    * Creates a new DriveForDistance.
    */
-  public DriveForDistance(DrivetrainSubsystem drivetrain, double setpoint, double turn, double speed) {
+  public DriveWithGyroGears(DrivetrainSubsystem drivetrain, ShifterSubsystem shifter, double setpoint, double heading, double speed, boolean highGear) {
     mDrivetrain = drivetrain;
+    mShifter = shifter;
+    mIsHighGear = highGear;
     mSetpoint = setpoint;
-    mTurn = turn;
+    mHeading = heading;
     mSpeed = speed;
     addRequirements(mDrivetrain);
 
@@ -32,6 +37,12 @@ public class DriveForDistance extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    if (mIsHighGear) {
+      mShifter.highGear();
+    }
+    else {
+      mShifter.lowGear();
+    }
     mDrivetrain.resetEncoders();
     try {
       Thread.sleep(100);
@@ -44,7 +55,9 @@ public class DriveForDistance extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute () {
-    mDrivetrain.update( mTurn, mSpeed, 0);
+    double kP = -0.1;
+    double turn = (mHeading - mDrivetrain.getHeading()) * kP;
+    mDrivetrain.update( turn, mSpeed, 0);
   }
 
   // Called once the command ends or is interrupted.
