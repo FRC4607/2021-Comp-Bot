@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
@@ -31,7 +32,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.Auton;
+import frc.robot.commands.Auton_SixBall;
+import frc.robot.commands.Auton_ThreeBall;
 import frc.robot.commands.MoveTurretManual;
 import frc.robot.commands.RunFlywheel;
 import frc.robot.commands.RunHopperMotor;
@@ -79,6 +81,8 @@ public class RobotContainer {
   private final RunFlywheel runFlywheel = new RunFlywheel(flywheelSubsystem, operator);
   private final MoveTurretManual moveTurretManual = new MoveTurretManual(turretSubsystem, operator);
 
+  SendableChooser<Command> mChooser = new SendableChooser<>();
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     //drivetrainSubsystem.setForward();
@@ -90,6 +94,11 @@ public class RobotContainer {
     intakePneumaticsSubsystem.setDefaultCommand(setIntakeMotor);
     flywheelSubsystem.setDefaultCommand(runFlywheel);
     turretSubsystem.setDefaultCommand(moveTurretManual);
+    
+    
+    mChooser.addOption("Three Balls", new Auton_ThreeBall(drivetrainSubsystem, shifterSubsystem, turretSubsystem, flywheelSubsystem, transferWheelSubsystem, hopperSubsystem, indexerSubsystem, intakePneumaticsSubsystem));
+    mChooser.setDefaultOption("Six Balls", new Auton_SixBall(drivetrainSubsystem, shifterSubsystem, turretSubsystem, flywheelSubsystem, transferWheelSubsystem, hopperSubsystem, indexerSubsystem, intakePneumaticsSubsystem));
+    SmartDashboard.putData("Auto Mode", mChooser);
   }
 
   /**
@@ -110,7 +119,7 @@ public class RobotContainer {
 
     driver_aButton.whenPressed(new SwitchGears(shifterSubsystem));
     driver_bButton.whenPressed(new ToggleIntakePneumatics(intakePneumaticsSubsystem));
-    driver_yButton.whenPressed(new SwitchDriveMode(drivetrainSubsystem));
+    driver_yButton.whileHeld(new SwitchDriveMode(drivetrainSubsystem));
   
 
     operator_aButton.whileHeld(new RunHopperMotor(hopperSubsystem, indexerSubsystem));
@@ -202,7 +211,7 @@ public class RobotContainer {
     
     drivetrainSubsystem.zeroHeading();
     turretSubsystem.mEncoder.setPosition(0);
-    return new Auton(drivetrainSubsystem, shifterSubsystem, turretSubsystem, flywheelSubsystem, transferWheelSubsystem, hopperSubsystem, indexerSubsystem, intakePneumaticsSubsystem);
+    return mChooser.getSelected();
   }
 
   public Command getTestCommand() {

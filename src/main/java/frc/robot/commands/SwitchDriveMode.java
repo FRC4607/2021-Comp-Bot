@@ -8,16 +8,20 @@ public class SwitchDriveMode extends CommandBase {
 
     public SwitchDriveMode(DrivetrainSubsystem subsytem) {
         mDrivetrainSubsystem = subsytem;
-        addRequirements(subsytem);
+    }
+
+    @Override
+    public void end(boolean a) {
+        mDrivetrainSubsystem.disableAssist();
     }
 
     @Override
     public void initialize() {
-        mDrivetrainSubsystem.switchMode();
+        mDrivetrainSubsystem.enableAssist();
     }
 
     @Override
     public boolean isFinished() {
-        return true;
+        return false;
     }
 }

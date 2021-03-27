@@ -45,9 +45,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final Gyro mGyro;
   private final DifferentialDriveOdometry mOdometry;
 
-  private boolean mUseTank;
+  private boolean mDriveStraight;
   private static final AlternateEncoderType kAltEncType = AlternateEncoderType.kQuadrature;
   private static final int kCPR = 8192;
+
+  private double scanCount = 0;
+  private boolean captureHeading = false;
+  private double holdHeading = 0;
 
   public DrivetrainSubsystem(CANSparkMax leftMaster, CANSparkMax leftFollower, CANSparkMax rightMaster,
       CANSparkMax rightFollower) {
@@ -88,7 +92,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     mOdometry = new DifferentialDriveOdometry(mGyro.getRotation2d());
 
-    mUseTank = false;
+    mDriveStraight = false;
 
     mDrive.setDeadband(Constants.DRIVETRAIN.DEADBAND);
 
@@ -110,6 +114,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Left Vel", mLeftEncoder.getVelocity());
     SmartDashboard.putNumber("Right Vel", mRightEncoder.getVelocity());
     SmartDashboard.putNumber("Fake Gyro Value", mGyro.getRotation2d().getDegrees());
+
+    Pose2d pose = getPose();
+    SmartDashboard.putNumber("Pose X", pose.getX());
+    SmartDashboard.putNumber("Pose Y", pose.getY());
+    SmartDashboard.putNumber("Pose Rotation", pose.getRotation().getDegrees());
 
     //SmartDashboard.putNumber("m_left_alternateEncoder", m_left_alternateEncoder.getPosition());
     //SmartDashboard.putNumber("m_right_alternateEncoder", m_right_alternateEncoder.getPosition());
@@ -196,19 +205,40 @@ public class DrivetrainSubsystem extends SubsystemBase {
     mGyro.reset();
   }
 
-  public void switchMode() {
-    mUseTank = !mUseTank;
+  public void disableAssist() {
+    mDriveStraight = false;
+  }
+  public void enableAssist() {
+    mDriveStraight = true;
+  }
+
+  private void switchMode() {
+    mDriveStraight = !mDriveStraight;
   }
 
   public void update(double stick1, double stick2, double stick3) {
-    if (!mUseTank) {
-      SmartDashboard.putNumber("stick1", stick1);
-      SmartDashboard.putNumber("stick2", stick2);
-      mDrive.arcadeDrive(stick2, stick1);
+    if (Math.abs(stick1) < 0.1) {
+      if (scanCount >= 5) {
+        if (!captureHeading) {
+          holdHeading = getHeading();
+          captureHeading = true;
+        }
+        if (mDriveStraight) {
+          holdHeading = 0;
+        }
+        stick1 = (holdHeading - getHeading()) * -0.05;
+      }
+      else {
+        scanCount += 1;
+      }
     }
     else {
-      mDrive.tankDrive(stick1, -stick3);
+      scanCount = 0;
+      captureHeading = false;
     }
+    SmartDashboard.putNumber("stick1", stick1);
+    SmartDashboard.putNumber("stick2", stick2);
+    mDrive.arcadeDrive(stick2, stick1);
   }
 
   public static DrivetrainSubsystem create() {
