@@ -152,7 +152,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     //drivetrainSubsystem.setReverse();
-    /*String trajectoryJSON = "paths/Test.wpilib.json";
+    String trajectoryJSON = "paths/Test.wpilib.json";
     Trajectory trajectory = new Trajectory();
     try {
       Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
@@ -160,7 +160,7 @@ public class RobotContainer {
 
     } catch (IOException ex) {
       DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
-    }*/
+    }
 
     /*var autoVoltageConstraint =
         new DifferentialDriveVoltageConstraint(
@@ -197,7 +197,7 @@ public class RobotContainer {
         new Pose2d(7.0, 0.0, new Rotation2d(Math.toRadians(0))),
         // Pass config
         config
-    );
+    );*/
 
     shifterSubsystem.lowGear();
     drivetrainSubsystem.resetOdometry(trajectory.getInitialPose());
@@ -219,11 +219,11 @@ public class RobotContainer {
     );
 
     
-    return ramseteCommand.andThen(() -> drivetrainSubsystem.tankDriveVolts(0, 0));*/
+    return ramseteCommand.andThen(() -> drivetrainSubsystem.tankDriveVolts(0, 0));
     
-    drivetrainSubsystem.zeroHeading();
+    /*drivetrainSubsystem.zeroHeading();
     turretSubsystem.mEncoder.setPosition(0);
-    return mChooser.getSelected();
+    return mChooser.getSelected();*/
   }
 
   public Command getTestCommand() {

@@ -110,13 +110,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public void periodic() {
     /* grab some input data from Pigeon and gamepad */
     SmartDashboard.putNumber("Left Dist", getLeftEncoderPos());
+    SmartDashboard.putNumber("Left Dist Internal", mLeftMaster.getEncoder().getPosition());
     SmartDashboard.putNumber("Right Dist", getRightEncoderPos());
+    SmartDashboard.putNumber("Right Dist Internal", mRightMaster.getEncoder().getPosition());
     SmartDashboard.putNumber("Left Vel", mLeftEncoder.getVelocity());
     SmartDashboard.putNumber("Right Vel", mRightEncoder.getVelocity());
-    SmartDashboard.putNumber("Fake Gyro Value", mGyro.getRotation2d().getDegrees());
+    SmartDashboard.putNumber("Gyro", mGyro.getRotation2d().getDegrees());
 
     Pose2d pose = getPose();
-    //SmartDashboard.putString("Pose", pose.toString());
+    SmartDashboard.putString("Pose", pose.toString());
 
     //SmartDashboard.putNumber("m_left_alternateEncoder", m_left_alternateEncoder.getPosition());
     //SmartDashboard.putNumber("m_right_alternateEncoder", m_right_alternateEncoder.getPosition());
@@ -147,7 +149,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   public void resetEncoders() {
     mLeftEncoder.setPosition(0);
+    mLeftMaster.getEncoder().setPosition(0);
     mRightEncoder.setPosition(0);
+    mRightMaster.getEncoder().setPosition(0);
   }
 
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
@@ -189,10 +193,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
   public double getLeftEncoderPos() {
     return mLeftEncoder.getPosition();
+    //return mLeftMaster.getEncoder().getPosition() * motor_kCPPR;
   }
 
   public double getRightEncoderPos() {
-    return mRightEncoder.getPosition();
+    //return mRightEncoder.getPosition();
+    return -mRightMaster.getEncoder().getPosition()*.02;
   }
 
   public void setMaxOutput(double maxOutput) {
