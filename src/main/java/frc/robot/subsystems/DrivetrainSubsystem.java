@@ -116,9 +116,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Fake Gyro Value", mGyro.getRotation2d().getDegrees());
 
     Pose2d pose = getPose();
-    SmartDashboard.putNumber("Pose X", pose.getX());
-    SmartDashboard.putNumber("Pose Y", pose.getY());
-    SmartDashboard.putNumber("Pose Rotation", pose.getRotation().getDegrees());
+    //SmartDashboard.putString("Pose", pose.toString());
 
     //SmartDashboard.putNumber("m_left_alternateEncoder", m_left_alternateEncoder.getPosition());
     //SmartDashboard.putNumber("m_right_alternateEncoder", m_right_alternateEncoder.getPosition());

@@ -20,7 +20,7 @@ public class IntakeSubsystem extends SubsystemBase {
         mRoller = roller;
         mExtended = false;
 
-        mArms.set(kReverse);
+        mArms.set(kForward);
 
         mRoller.configContinuousCurrentLimit( Constants.CURRENT_LIMIT.TALON_AMPS_LIMIT );
         mRoller.configPeakCurrentLimit( Constants.CURRENT_LIMIT.TALON_AMPS_LIMIT );
@@ -39,12 +39,12 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     private void extend() {
-        mArms.set(kForward);
+        mArms.set(kReverse);
         mExtended = true;
     }
 
     private void retract() {
-        mArms.set(kReverse);
+        mArms.set(kForward);
         mExtended = false;
     }
     

@@ -45,6 +45,7 @@ public class Auton_ThreeBall extends CommandBase {
 
     @Override
     public void initialize() {
+        mIntake.toggleIntake();
         mScheduler.schedule(new TurretAlignment(mTurret).withTimeout(0.2));
         mScheduler.schedule(new TurretAlignment(mTurret).withTimeout(1).andThen(() -> {
             mFlywheel.setClosedLoop(5000);

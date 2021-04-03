@@ -34,11 +34,14 @@ import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.Auton_SixBall;
 import frc.robot.commands.Auton_ThreeBall;
+import frc.robot.commands.ExtendClimber;
 import frc.robot.commands.MoveTurretManual;
+import frc.robot.commands.RetractClimber;
 import frc.robot.commands.RunFlywheel;
 import frc.robot.commands.RunHopperMotor;
 import frc.robot.commands.RunTransferWheel;
 import frc.robot.commands.SetIntakeMotor;
+import frc.robot.commands.SwitchClimberGear;
 import frc.robot.commands.SwitchDriveMode;
 import frc.robot.commands.SwitchGears;
 import frc.robot.commands.TeleOp;
@@ -46,6 +49,7 @@ import frc.robot.commands.ToggleIntakePneumatics;
 import frc.robot.commands.TurretAlignment;
 import frc.robot.commands.ZeroEncoders;
 import frc.robot.commands.ZeroHeading;
+import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.FlywheelSubsystem;
 import frc.robot.subsystems.HopperSubsystem;
@@ -71,6 +75,7 @@ public class RobotContainer {
   public static TransferWheelSubsystem transferWheelSubsystem = TransferWheelSubsystem.create();
   public static FlywheelSubsystem flywheelSubsystem = FlywheelSubsystem.create();
   public static TurretSubsystem turretSubsystem = TurretSubsystem.create();
+  public static ClimberSubsystem climberSubsystem = ClimberSubsystem.create();
 
   // Joysticks
   public XboxController driver = new XboxController(Constants.CONTROLLER.DRIVER_XBOX);
@@ -94,6 +99,7 @@ public class RobotContainer {
     intakePneumaticsSubsystem.setDefaultCommand(setIntakeMotor);
     flywheelSubsystem.setDefaultCommand(runFlywheel);
     turretSubsystem.setDefaultCommand(moveTurretManual);
+    climberSubsystem.set(0);
     
     
     mChooser.addOption("Three Balls", new Auton_ThreeBall(drivetrainSubsystem, shifterSubsystem, turretSubsystem, flywheelSubsystem, transferWheelSubsystem, hopperSubsystem, indexerSubsystem, intakePneumaticsSubsystem));
@@ -110,7 +116,10 @@ public class RobotContainer {
   private void configureButtonBindings() {
     JoystickButton driver_aButton = new JoystickButton(driver, 1);
     JoystickButton driver_bButton = new JoystickButton(driver, 2);
+    //JoystickButton driver_xButton = new JoystickButton(driver, 3);
     JoystickButton driver_yButton = new JoystickButton(driver, 4);
+    JoystickButton driver_leftButton = new JoystickButton(driver, 5);
+    JoystickButton driver_rightButton = new JoystickButton(driver, 6);
 
     JoystickButton operator_aButton = new JoystickButton(operator, 1);
     JoystickButton operator_bButton = new JoystickButton(operator, 2);
@@ -119,7 +128,10 @@ public class RobotContainer {
 
     driver_aButton.whenPressed(new SwitchGears(shifterSubsystem));
     driver_bButton.whenPressed(new ToggleIntakePneumatics(intakePneumaticsSubsystem));
+    //driver_xButton.whenPressed(new SwitchClimberGear(climberSubsystem));
     driver_yButton.whileHeld(new SwitchDriveMode(drivetrainSubsystem));
+    driver_leftButton.whileHeld(new RetractClimber(climberSubsystem));
+    driver_rightButton.whileHeld(new ExtendClimber(climberSubsystem));
   
 
     operator_aButton.whileHeld(new RunHopperMotor(hopperSubsystem, indexerSubsystem));
