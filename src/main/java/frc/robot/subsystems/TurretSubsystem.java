@@ -38,6 +38,8 @@ public class TurretSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        //CPA 04 03 2021 Update always
+        SmartDashboard.putNumber("Hood Encoder", mEncoder.getPosition());
     }
 
     @Override
@@ -83,4 +85,9 @@ public class TurretSubsystem extends SubsystemBase {
         CANSparkMax hood = SparkMax.CreateSparkMax(new CANSparkMax(Constants.HOOD.MASTER_ID, MotorType.kBrushless));
         return new TurretSubsystem(turret, limelight, hood);
     }
+
+	public void resetEncoder() {
+        mEncoder.setPosition(0);
+        SmartDashboard.putNumber("Hood Encoder", mEncoder.getPosition());
+	}
 }

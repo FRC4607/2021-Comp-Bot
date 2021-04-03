@@ -49,6 +49,7 @@ import frc.robot.commands.ToggleIntakePneumatics;
 import frc.robot.commands.TurretAlignment;
 import frc.robot.commands.ZeroEncoders;
 import frc.robot.commands.ZeroHeading;
+import frc.robot.commands.ZeroHood;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.FlywheelSubsystem;
@@ -58,6 +59,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShifterSubsystem;
 import frc.robot.subsystems.TransferWheelSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.util.AndJoystickButton;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -119,12 +121,14 @@ public class RobotContainer {
     //JoystickButton driver_xButton = new JoystickButton(driver, 3);
     JoystickButton driver_yButton = new JoystickButton(driver, 4);
     JoystickButton driver_leftButton = new JoystickButton(driver, 5);
-    JoystickButton driver_rightButton = new JoystickButton(driver, 6);
+    //JoystickButton driver_rightButton = new JoystickButton(driver, 6);
+    AndJoystickButton driver_rightButton = new AndJoystickButton(driver, 6, driver, 8);
 
     JoystickButton operator_aButton = new JoystickButton(operator, 1);
     JoystickButton operator_bButton = new JoystickButton(operator, 2);
     JoystickButton operator_xButton = new JoystickButton(operator, 3);
     JoystickButton operator_leftBumper = new JoystickButton(operator, 5);
+    AndJoystickButton operator_ResetHood = new AndJoystickButton(operator, 7, operator, 8);
 
     driver_aButton.whenPressed(new SwitchGears(shifterSubsystem));
     driver_bButton.whenPressed(new ToggleIntakePneumatics(intakePneumaticsSubsystem));
@@ -140,6 +144,10 @@ public class RobotContainer {
       indexerSubsystem.mBackwards = !indexerSubsystem.mBackwards;
       transferWheelSubsystem.mBackwards = !transferWheelSubsystem.mBackwards; } ));
     operator_leftBumper.whileHeld(new TurretAlignment(turretSubsystem));
+
+    operator_ResetHood.whenPressed(new ZeroHood(turretSubsystem));
+
+  
 
     SmartDashboard.putData("Zero Heading", new ZeroHeading(drivetrainSubsystem));
     SmartDashboard.putData("Zero Encoders", new ZeroEncoders(drivetrainSubsystem));

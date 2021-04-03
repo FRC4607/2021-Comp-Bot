@@ -13,7 +13,12 @@ public class ExtendClimber extends CommandBase{
 
     @Override
     public void initialize() {
-        mClimber.toggle();
+        //CPA 04 03 2021 Commmand the Clmber to Unlock
+        /*if(DriverStation.getInstance().getMatchTime()>??){
+            mClimber.unlock();
+        }*/
+        mClimber.unlock();
+        //mClimber.toggle();
     }
 
     @Override
