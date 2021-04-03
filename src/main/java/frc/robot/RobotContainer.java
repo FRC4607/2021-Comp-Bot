@@ -135,7 +135,7 @@ public class RobotContainer {
     //driver_xButton.whenPressed(new SwitchClimberGear(climberSubsystem));
     driver_yButton.whileHeld(new SwitchDriveMode(drivetrainSubsystem));
     driver_leftButton.whileHeld(new RetractClimber(climberSubsystem));
-    driver_rightButton.whileHeld(new ExtendClimber(climberSubsystem));
+    driver_rightButton.whileHeld(new ExtendClimber(climberSubsystem, intakePneumaticsSubsystem));
   
 
     operator_aButton.whileHeld(new RunHopperMotor(hopperSubsystem, indexerSubsystem));
@@ -229,6 +229,7 @@ public class RobotContainer {
     
     return ramseteCommand.andThen(() -> drivetrainSubsystem.tankDriveVolts(0, 0));*/
     
+    intakePneumaticsSubsystem.extend();
     drivetrainSubsystem.zeroHeading();
     turretSubsystem.mEncoder.setPosition(0);
     return mChooser.getSelected();

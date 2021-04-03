@@ -45,18 +45,19 @@ public class Auton_ThreeBall extends CommandBase {
 
     @Override
     public void initialize() {
-        mIntake.toggleIntake();
-        mScheduler.schedule(new TurretAlignment(mTurret).withTimeout(0.2));
-        mScheduler.schedule(new TurretAlignment(mTurret).withTimeout(1).andThen(() -> {
-            mFlywheel.setClosedLoop(5000);
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            mScheduler.schedule(new AutonFlywheel(mTransferWheel, mHopperMotor, mIndexerMotor).withTimeout(2).andThen(() -> {
-                mScheduler.schedule(new ParallelDeadlineGroup(new DriveWithGyroGears(mDrivetrain, mShifter, 1, 0, 0.80, false).andThen(() -> {
-                }, mFlywheel, mDrivetrain ), new AutonIntake(mIntake)));
+        mScheduler.schedule(new DriveWithGyroGears(mDrivetrain, mShifter, -1, 0, 1, false).andThen(() -> {
+            mScheduler.schedule(new TurretAlignment(mTurret).withTimeout(0.2));
+            mScheduler.schedule(new TurretAlignment(mTurret).withTimeout(1).andThen(() -> {
+                mFlywheel.setClosedLoop(5000);
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                mScheduler.schedule(new AutonFlywheel(mTransferWheel, mHopperMotor, mIndexerMotor).withTimeout(2).andThen(() -> {
+                    mScheduler.schedule(new ParallelDeadlineGroup(new DriveWithGyroGears(mDrivetrain, mShifter, 1, 0, 0.80, false).andThen(() -> {
+                    }, mFlywheel, mDrivetrain ), new AutonIntake(mIntake)));
+                }, mFlywheel, mDrivetrain));
             }, mFlywheel, mDrivetrain));
         }, mFlywheel, mDrivetrain));
     }

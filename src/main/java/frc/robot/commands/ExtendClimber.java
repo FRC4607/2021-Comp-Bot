@@ -2,13 +2,16 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ClimberSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 
 public class ExtendClimber extends CommandBase{
     private final ClimberSubsystem mClimber;
+    private final IntakeSubsystem mIntake;
 
-    public ExtendClimber(ClimberSubsystem climber) {
+    public ExtendClimber(ClimberSubsystem climber, IntakeSubsystem intake) {
         mClimber = climber;
-        addRequirements(mClimber);
+        mIntake = intake;
+        addRequirements(mClimber, mIntake);
     }
 
     @Override
@@ -18,6 +21,7 @@ public class ExtendClimber extends CommandBase{
             mClimber.unlock();
         }*/
         mClimber.unlock();
+        mIntake.retract();
         //mClimber.toggle();
     }
 
