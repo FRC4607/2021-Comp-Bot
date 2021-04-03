@@ -221,9 +221,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
           holdHeading = getHeading();
           captureHeading = true;
         }
-        if (mDriveStraight) {
-          holdHeading = 0;
-        }
         stick1 = (holdHeading - getHeading()) * -0.05;
       }
       else {
@@ -234,6 +231,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
       scanCount = 0;
       captureHeading = false;
     }
+
+    //If DriveStraight then override stearing
+    if (mDriveStraight) {
+      holdHeading = 0;
+      stick1 = (holdHeading - getHeading()) * -0.05;
+    }
+    
     SmartDashboard.putNumber("stick1", stick1);
     SmartDashboard.putNumber("stick2", stick2);
     mDrive.arcadeDrive(stick2, stick1);
