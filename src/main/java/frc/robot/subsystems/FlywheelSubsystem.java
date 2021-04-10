@@ -17,6 +17,9 @@ public class FlywheelSubsystem extends SubsystemBase {
 
     private double mTarget;
 
+    // 100ms * 10 * 60 to go from r/100ms to rpm
+    private int conversionFactor = 600;
+
     public FlywheelSubsystem(WPI_TalonSRX master, WPI_TalonSRX follower) {
         mMaster = master;
         mFollower = follower;
@@ -46,11 +49,10 @@ public class FlywheelSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        double mCurrentVelocity_UPMS = mMaster.getSelectedSensorVelocity( Constants.FLYWHEEL.PID_IDX );
-        double mCurrentVelocity_RPM = mMaster.getSelectedSensorVelocity( Constants.FLYWHEEL.PID_IDX ) / Constants.FLYWHEEL.SENSOR_UNITS_PER_ROTATION * 600.0;
+        double mCurrentVelocity_RPM = mMaster.getSelectedSensorVelocity( Constants.FLYWHEEL.PID_IDX ) / Constants.FLYWHEEL.SENSOR_UNITS_PER_ROTATION * conversionFactor;
         double mError_RPM = mTarget - mCurrentVelocity_RPM;
         SmartDashboard.putNumber( "FlyWheel Target (RPM)", mTarget );   
-        SmartDashboard.putNumber( "FlyWheel UPMS", mCurrentVelocity_UPMS );
+        SmartDashboard.putNumber( "FlyWheel RPM", mCurrentVelocity_RPM );
         SmartDashboard.putNumber( "Flywheel Error (RPM)", mError_RPM);
     }
 
@@ -78,7 +80,7 @@ public class FlywheelSubsystem extends SubsystemBase {
 
     public void setClosedLoop(double target) {
         mTarget = target;
-        mMaster.set(ControlMode.Velocity, target / 600 * Constants.FLYWHEEL.SENSOR_UNITS_PER_ROTATION);
+        mMaster.set(ControlMode.Velocity, target / conversionFactor * Constants.FLYWHEEL.SENSOR_UNITS_PER_ROTATION);
     }
 
     public static FlywheelSubsystem create() {

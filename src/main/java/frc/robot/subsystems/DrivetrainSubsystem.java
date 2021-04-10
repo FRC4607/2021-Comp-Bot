@@ -162,6 +162,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
     return mGyro.getRotation2d().getDegrees();
   }
 
+  public double getRate() {
+    return -mGyro.getRate();
+  }
+
   public Pose2d getPose() {
     return mOdometry.getPoseMeters();
   }

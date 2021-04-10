@@ -135,14 +135,12 @@ public class RobotContainer {
     //driver_xButton.whenPressed(new SwitchClimberGear(climberSubsystem));
     driver_yButton.whileHeld(new SwitchDriveMode(drivetrainSubsystem));
     driver_leftButton.whileHeld(new RetractClimber(climberSubsystem));
-    driver_rightButton.whileHeld(new ExtendClimber(climberSubsystem));
+    driver_rightButton.whileHeld(new ExtendClimber(climberSubsystem, intakePneumaticsSubsystem));
   
 
-    operator_aButton.whileHeld(new RunHopperMotor(hopperSubsystem, indexerSubsystem));
+    operator_aButton.whileHeld(new RunHopperMotor(hopperSubsystem, indexerSubsystem, false));
     operator_bButton.whileHeld(new RunTransferWheel(transferWheelSubsystem));
-    operator_xButton.whenPressed(new InstantCommand( () -> { hopperSubsystem.mBackwards = !hopperSubsystem.mBackwards;
-      indexerSubsystem.mBackwards = !indexerSubsystem.mBackwards;
-      transferWheelSubsystem.mBackwards = !transferWheelSubsystem.mBackwards; } ));
+    operator_xButton.whileHeld(new RunHopperMotor(hopperSubsystem, indexerSubsystem, true));
     operator_leftBumper.whileHeld(new TurretAlignment(turretSubsystem));
 
     operator_ResetHood.whenPressed(new ZeroHood(turretSubsystem));
@@ -229,6 +227,7 @@ public class RobotContainer {
     
     return ramseteCommand.andThen(() -> drivetrainSubsystem.tankDriveVolts(0, 0));*/
     
+    intakePneumaticsSubsystem.extend();
     drivetrainSubsystem.zeroHeading();
     turretSubsystem.mEncoder.setPosition(0);
     return mChooser.getSelected();

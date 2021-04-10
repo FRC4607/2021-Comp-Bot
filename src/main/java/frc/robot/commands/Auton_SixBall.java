@@ -55,7 +55,7 @@ public class Auton_SixBall extends CommandBase {
                 e.printStackTrace();
             }
             mScheduler.schedule(new AutonFlywheel(mTransferWheel, mHopperMotor, mIndexerMotor).withTimeout(2).andThen(() -> {
-                mScheduler.schedule(new ParallelDeadlineGroup(new DriveWithGyroGears(mDrivetrain, mShifter, 4.5, 0, 1, false).andThen(() -> {
+                mScheduler.schedule(new ParallelDeadlineGroup(new DriveWithGyroGears(mDrivetrain, mShifter, 4.5, 0, 0.9, false).andThen(() -> {
                     mIntake.setRoller(0);
                     mScheduler.schedule(new DriveWithGyroGears(mDrivetrain, mShifter, 2.5, 0, -0.75, true).andThen(() -> {
                         mScheduler.schedule(new TurretAlignment(mTurret).withTimeout(1).andThen(() -> {

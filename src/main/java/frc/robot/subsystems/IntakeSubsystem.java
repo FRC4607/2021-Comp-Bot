@@ -38,12 +38,12 @@ public class IntakeSubsystem extends SubsystemBase {
         // This method will be called once per scheduler run during simulation
     }
 
-    private void extend() {
+    public void extend() {
         mArms.set(kReverse);
         mExtended = true;
     }
 
-    private void retract() {
+    public void retract() {
         mArms.set(kForward);
         mExtended = false;
     }
