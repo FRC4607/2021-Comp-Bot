@@ -63,8 +63,8 @@ public class Auton_SixBall extends CommandBase {
                                 mFlywheel.setOpenLoop();
                             }, mFlywheel, mDrivetrain));
                         }, mFlywheel, mDrivetrain));
-                    }, mFlywheel, mDrivetrain));
-                }, mFlywheel, mDrivetrain ), new AutonIntake(mIntake)));
+                    }, mFlywheel, mDrivetrain ), new AutonIntake(mIntake)));
+                }, mFlywheel, mDrivetrain));
             }, mFlywheel, mDrivetrain));
         }, mFlywheel, mDrivetrain));
     }
