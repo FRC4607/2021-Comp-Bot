@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.Auton_SixBall;
+import frc.robot.commands.Auton_SixBallReducedSpeed;
 import frc.robot.commands.Auton_ThreeBall;
 import frc.robot.commands.ExtendClimber;
 import frc.robot.commands.MoveTurretManual;
@@ -105,6 +106,7 @@ public class RobotContainer {
     
     
     mChooser.addOption("Three Balls", new Auton_ThreeBall(drivetrainSubsystem, shifterSubsystem, turretSubsystem, flywheelSubsystem, transferWheelSubsystem, hopperSubsystem, indexerSubsystem, intakePneumaticsSubsystem));
+    mChooser.addOption("Six Balls, Reduced Speed", new Auton_SixBallReducedSpeed(drivetrainSubsystem, shifterSubsystem, turretSubsystem, flywheelSubsystem, transferWheelSubsystem, hopperSubsystem, indexerSubsystem, intakePneumaticsSubsystem));
     mChooser.setDefaultOption("Six Balls", new Auton_SixBall(drivetrainSubsystem, shifterSubsystem, turretSubsystem, flywheelSubsystem, transferWheelSubsystem, hopperSubsystem, indexerSubsystem, intakePneumaticsSubsystem));
     SmartDashboard.putData("Auto Mode", mChooser);
   }
@@ -133,7 +135,7 @@ public class RobotContainer {
     driver_aButton.whenPressed(new SwitchGears(shifterSubsystem));
     driver_bButton.whenPressed(new ToggleIntakePneumatics(intakePneumaticsSubsystem));
     //driver_xButton.whenPressed(new SwitchClimberGear(climberSubsystem));
-    driver_yButton.whileHeld(new SwitchDriveMode(drivetrainSubsystem));
+    //driver_yButton.whileHeld(new SwitchDriveMode(drivetrainSubsystem));
     driver_leftButton.whileHeld(new RetractClimber(climberSubsystem));
     driver_rightButton.whileHeld(new ExtendClimber(climberSubsystem, intakePneumaticsSubsystem));
   
